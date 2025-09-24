@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+.venv/
+
+# Node
+node_modules/
+
+# Env
+.env
+
+# VSCode / OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Models & Pickles (nặng)
+models/
+*.pkl
+
+# Data: ignore tất cả, nhưng GIỮ file .txt nhỏ
+data/**
+!data/
+!data/*.txt
