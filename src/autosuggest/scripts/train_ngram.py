@@ -1,4 +1,4 @@
-from src.lm.ngram import NGramLM
+from src.autosuggest.lm.ngram import NGramLM
 import pathlib
 
 pathlib.Path("models").mkdir(exist_ok=True)
