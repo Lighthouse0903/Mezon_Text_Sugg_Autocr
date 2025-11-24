@@ -1,244 +1,220 @@
 # Mezon Text Suggestion & Autocorrect  
-A lightweight, modular, and extensible text-suggestion + autocorrect engine for Vietnamese input, designed for real-time usage inside chatbots or UI typing environments.
+A lightweight, modular, and extensible Vietnamese text-suggestion + autocorrect engine designed for real-time chatbot UI and typing-assistant environments.
 
----
+-------------------------------------------------------------------------------
 
-##  Overview  
-**Mezon Text Suggestion & Autocorrect** là dự án xử lý ngôn ngữ tự nhiên (NLP) dùng để:
+# 1. OVERVIEW  
 
-- Gợi ý từ (autosuggest)
-- Sửa lỗi chính tả theo ngữ cảnh (autocorrect)
-- Chuẩn hoá văn bản tiếng Việt (remove dấu lỗi, fix teencode, normalize Unicode)
-- Đưa ra các candidate từ/tổ hợp câu phù hợp dựa vào corpus + thuật toán n-gram
-- Chạy **real-time** trong giao diện chatbot Mezon // Inprogess
+Mezon Text Suggestion & Autocorrect là hệ thống xử lý tiếng Việt bao gồm:
 
-Dự án được chia thành nhiều mô-đun rõ ràng:  
-- Engine chính (`src/`)
-- Module autosuggest + autocorrect
-- Bộ tiền xử lý dữ liệu, training corpus  
-- Real-time API/UI tích hợp vào Mezon bot (`mezon_bot/`)
-- Notebook phân tích thử nghiệm (`notebooks/`)
+- Autosuggest: gợi ý từ tiếp theo dựa trên ngữ cảnh và n-gram  
+- Autocorrect: sửa lỗi chính tả, lỗi bàn phím, lỗi dấu  
+- Normalization: chuẩn hóa Unicode tiếng Việt, xử lý teencode  
+- Candidate generation: sinh từ ứng viên dựa trên edit distance + keyboard distance  
+- Language Model: unigram, bigram, trigram  
+- Realtime engine: xử lý khi người dùng nhập từng ký tự  
+- Mezon Bot integration: UI + API phục vụ chat realtime  
 
----
+Dự án được chia thành các module chính:
 
-## Features  
-### Autocorrect Engine  
+- Python Engine (src/)  
+- Autocorrect & Autosuggest modules  
+- Data pipeline phục vụ training  
+- Realtime Node.js integration (mezon_bot/)  
+- Notebooks phân tích thử nghiệm  
+
+-------------------------------------------------------------------------------
+
+# 2. FEATURES
+
+## Autocorrect Engine  
 - Sửa lỗi gõ sai dấu, thiếu dấu  
-- Sửa lỗi gõ nhầm phím (keyboard distance rules)  
-- Sửa lỗi ghép từ không hợp lệ  
-- Thay thế teencode / viết tắt sang văn bản nghiêm túc  
-- Normalization tiếng Việt (NFC/NFD, chuẩn hoá Unicode)
+- Sửa lỗi gõ nhầm phím theo keyboard distance  
+- Chuẩn hóa Unicode (NFC/NFD)  
+- Xử lý teencode → tiếng Việt chuẩn  
+- Context-based correction  
+- Candidate ranking dựa vào n-gram  
 
-### Autosuggest Engine  
-- Gợi ý từ dựa trên n-gram (2-gram, 3-gram)  
-- Tạo danh sách candidate theo frequency từ corpus  
-- Ranking candidates theo score + context window  
-- Gợi ý thời gian thực khi người dùng đang nhập
+## Autosuggest Engine  
+- N-gram language model (2-gram, 3-gram)  
+- Dự đoán từ tiếp theo theo xác suất  
+- Candidate ranking  
+- Hỗ trợ chạy realtime  
 
-### Real-time Support  
-- Module `realtime.py` chạy gợi ý tức thì (suitable for chatbot UI)  
-- Tối ưu performance để không bị trễ khi người dùng đang gõ  
+## Realtime Support  
+- Autocorrect realtime engine (Python)  
+- Node.js Web/API realtime  
+- Tối ưu tốc độ cho UI chatbot  
 
-### Data Pipeline  
+## Data Pipeline  
 - Làm sạch corpus  
-- Tạo cặp noisy data → training autocorrect  
-- Sinh vocab + thống kê n-gram  
-- Split dataset phục vụ test/eval  
+- Sinh noisy data  
+- Tạo vocab  
+- Split dataset train/val/test  
+- Training scripts đầy đủ  
 
----
+-------------------------------------------------------------------------------
 
-## Project Structure  
-Cấu trúc repo dựa trên source bạn cung cấp:
-Mezon_Text_Sugg_Autocr/
-├── mezon_bot/
-│   ├── api/                          # API backend phục vụ bot (HTTP/WebSocket)
-│   ├── node_modules/                 # Dependencies Node.js
-│   ├── ui/                           # Giao diện/UI cho bot hoặc demo typing
-│   ├── bot_keyboard.js               # Logic xử lý gõ phím trong UI bot (keyup/keydown events)
-│   ├── bot_test.js                   # Script test bot, gửi input → nhận gợi ý để kiểm tra nhanh
-│   ├── index.js                      # Entry point chính của bot (khởi chạy server, load API)
-│   ├── package.json                  # Metadata + dependencies cho Node.js bot
-│   └── package-lock.json             # Lock dependency (đảm bảo version cố định)
-│
-├── notebooks/
-│   └── *.ipynb                       # Jupyter notebooks 
-│
-├── src/
-│   ├── autocorrect/
-│   │   ├── core/
-│   │   │   ├── context_corrector.py  # Sửa lỗi dựa vào ngữ cảnh câu (context-based correction)
-│   │   │   ├── demo_realtime.py      # Demo real-time autocorrect chạy trên terminal
-│   │   │   ├── generate_candidate.py # Sinh danh sách từ candidate dựa vào:
-│   │   │   │                         # edit distance, keyboard distance, heuristic rules
-│   │   │   ├── hard_rules.py         # Các luật cứng: teencode → tiếng Việt chuẩn, fix viết tắt
-│   │   │   ├── keyboard_fix.py       # Sửa lỗi gõ nhầm phím (bấm phím cạnh nhau)
-│   │   │   ├── normalize_vi.py       # Chuẩn hóa Unicode tiếng Việt (NFC/NFD)
-│   │   │   ├── rank_candidates.py    # Xếp hạng candidate theo điểm n-gram + context score
-│   │   │   └── realtime.py           # Engine chạy autocorrect thời gian thực
-│   │   │
-│   │   ├── data/
-│   │   │   ├── analyze_pairs.py      # Phân tích cặp từ đúng–sai trong dataset
-│   │   │   ├── build_vocab.py        # Tạo vocab (từ điển) từ corpus sạch
-│   │   │   ├── clean_external_corpus.py# Làm sạch corpus dạng thô (remove ký tự lỗi)
-│   │   │   ├── filter_pairs.py       # Lọc dataset các cặp từ sai–đúng
-│   │   │   ├── filter_pairs_by_distance.py # Lọc thêm theo edit distance cho training
-│   │   │   └── split_dataset.py      # Tách dataset thành train/val/test
-│   │   │
-│   │   └── scripts/
-│   │       ├── autocorrect_model.py  # Mô hình autocorrect (training hoặc load model)
-│   │       └── infer.py              # Script thực thi autocorrect với input dòng lệnh
-│   │
-│   ├── autosuggest/
-│   │   ├── data/
-│   │   │   ├── clean_corpus.py       # Làm sạch văn bản → dùng cho n-gram training
-│   │   │   ├── generate_noisy_pairs.py# Tạo dữ liệu nhiễu để kiểm tra autosuggest
-│   │   │   └── split.py              # Tách dữ liệu autosuggest thành train/test
-│   │   │
-│   │   ├── eval/
-│   │   │   ├── quick_eval.py         # Đánh giá nhanh chất lượng gợi ý
-│   │   │   └── test_model.py         # Test accuracy autosuggest với dataset
-│   │   │
-│   │   ├── lm/
-│   │   │   └── ngram.py              # Mô hình n-gram (unigram/bigram/trigram)
-│   │   │                             # tính xác suất từ tiếp theo
-│   │   │
-│   │   └── scripts/
-│   │       └── train_ngram.py        # Script huấn luyện n-gram model từ corpus
-│   │
-│   ├── requirements.txt              # Dependencies Python của toàn project
-│   └── .gitignore                    # Ignore file không cần commit
-│
-└── .venv/                             # (Không commit) Virtual environment Python
+# 3. PROJECT STRUCTURE
 
-# TUTORIAL — HƯỚNG DẪN SỬ DỤNG DỰ ÁN
+Mezon_Text_Sugg_Autocr/  
+│  
+├── mezon_bot/  
+│   ├── api/                           API backend kết nối Python ↔ Node.js  
+│   ├── node_modules/                  Dependencies Node.js  
+│   ├── ui/                            UI demo realtime  
+│   ├── bot_keyboard.js                Xử lý sự kiện bàn phím  
+│   ├── bot_test.js                    Test bot qua terminal  
+│   ├── index.js                       Server + UI + API bridge  
+│   ├── package.json                   Metadata + dependencies  
+│   └── package-lock.json              Lock version  
+│  
+├── notebooks/  
+│   └── *.ipynb                        Notebook phân tích, trực quan, test mô hình  
+│  
+├── src/  
+│   ├── autocorrect/  
+│   │   ├── core/  
+│   │   │   ├── context_corrector.py     Sửa lỗi theo ngữ cảnh  
+│   │   │   ├── demo_realtime.py         Demo realtime trong terminal  
+│   │   │   ├── generate_candidate.py    Sinh từ ứng viên  
+│   │   │   ├── hard_rules.py            Teencode/viết tắt rules  
+│   │   │   ├── keyboard_fix.py          Sửa lỗi gõ nhầm phím  
+│   │   │   ├── normalize_vi.py          Chuẩn hóa Unicode  
+│   │   │   ├── rank_candidates.py       Chấm điểm ứng viên  
+│   │   │   └── realtime.py              Autocorrect realtime engine  
+│   │   │  
+│   │   ├── data/  
+│   │   │   ├── analyze_pairs.py         Phân tích cặp sai - đúng  
+│   │   │   ├── build_vocab.py           Tạo từ điển  
+│   │   │   ├── clean_external_corpus.py Làm sạch corpus thô  
+│   │   │   ├── filter_pairs.py          Lọc tập cặp từ  
+│   │   │   ├── filter_pairs_by_distance.py Lọc thêm theo edit distance  
+│   │   │   └── split_dataset.py         Tách train/val/test  
+│   │   │  
+│   │   └── scripts/  
+│   │       ├── autocorrect_model.py     Train autocorrect  
+│   │       └── infer.py                 Chạy autocorrect qua terminal  
+│   │  
+│   ├── autosuggest/  
+│   │   ├── data/  
+│   │   │   ├── clean_corpus.py          Làm sạch corpus  
+│   │   │   ├── generate_noisy_pairs.py  Sinh noisy data  
+│   │   │   └── split.py                 Tách dataset  
+│   │   │  
+│   │   ├── eval/  
+│   │   │   ├── quick_eval.py            Đánh giá nhanh  
+│   │   │   └── test_model.py            Test accuracy  
+│   │   │  
+│   │   ├── lm/  
+│   │   │   └── ngram.py                 Mô hình n-gram  
+│   │   │  
+│   │   └── scripts/  
+│   │       └── train_ngram.py           Train n-gram  
+│  
+├── requirements.txt                    Danh sách dependencies Python  
+└── .gitignore                          File ignore của toàn project  
 
-## 1. SETUP MÔI TRƯỜNG
+-------------------------------------------------------------------------------
 
-### 1. Clone dự án về máy
-Lệnh tải mã nguồn từ GitHub:
-$ git clone https://github.com/Lighthouse0903/Mezon_Text_Sugg_Autocr.git
-$ cd Mezon_Text_Sugg_Autocr
+# 4. INSTALLATION (FAST SETUP)
 
-### 2. Tạo môi trường ảo Python (virtual environment)
-Tạo môi trường độc lập để tránh xung đột thư viện:
-$ python -m venv .venv
+$ git clone https://github.com/Lighthouse0903/Mezon_Text_Sugg_Autocr.git  
+$ cd Mezon_Text_Sugg_Autocr  
 
-### 3. Kích hoạt môi trường ảo
-Windows:
-$ .venv\Scripts\activate
+Tạo virtual environment:  
+$ python -m venv .venv  
 
-macOS/Linux:
-$ source .venv/bin/activate
+Kích hoạt môi trường ảo:  
+Windows:  
+$ .venv\Scripts\activate  
+Linux/macOS:  
+$ source .venv/bin/activate  
 
-### 4. Cài đặt dependencies
-$ pip install -r requirements.txt
+Cài đặt thư viện:  
+$ pip install -r requirements.txt  
 
+-------------------------------------------------------------------------------
 
-## 2. CHẠY AUTOCORRECT CƠ BẢN
+# 5. TUTORIAL — HƯỚNG DẪN SỬ DỤNG
 
-Autocorrect giúp sửa lỗi chính tả, lỗi bàn phím và lỗi dấu tiếng Việt.
+## 1. Chạy autocorrect cơ bản  
+$ python src/autocorrect/scripts/infer.py --text "hom nay toi di choi"  
 
-### Chạy thử chức năng sửa lỗi:
-$ python src/autocorrect/scripts/infer.py --text "hom nay toi di choi"
+## 2. Demo autocorrect realtime  
+$ python src/autocorrect/core/demo_realtime.py  
 
-Kết quả mong đợi:
-"hôm nay tôi đi chơi"
+## 3. Chạy autosuggest  
+$ python src/autosuggest/eval/test_model.py  
 
+## 4. Training autosuggest  
+$ python src/autosuggest/data/clean_corpus.py  
+$ python src/autosuggest/data/generate_noisy_pairs.py  
+$ python src/autosuggest/scripts/train_ngram.py  
 
-## 3. DEMO AUTOCORRECT REALTIME
+## 5. Training autocorrect  
+$ python src/autocorrect/data/clean_external_corpus.py  
+$ python src/autocorrect/data/build_vocab.py  
+$ python src/autocorrect/data/analyze_pairs.py  
+$ python src/autocorrect/data/filter_pairs.py  
+$ python src/autocorrect/scripts/autocorrect_model.py  
 
-Chế độ real-time xử lý từng ký tự nhập vào và đưa ra gợi ý tức thì.
+-------------------------------------------------------------------------------
 
-Chạy demo:
-$ python src/autocorrect/core/demo_realtime.py
+# 6. MEZON BOT INTEGRATION (NODE.JS)
 
+Cài dependencies Node.js:  
+$ cd mezon_bot  
+$ npm install  
 
-## 4. CHẠY AUTOSUGGEST (GỢI Ý TỪ TIẾP THEO)
+Chạy bot server:  
+$ node index.js  
 
-Autosuggest dự đoán từ tiếp theo dựa trên mô hình N-gram.
+Test nhanh bằng terminal:  
+$ node bot_test.js  
 
-Chạy test autosuggest:
-$ python src/autosuggest/eval/test_model.py
+UI realtime (mở trình duyệt):  
+http://localhost:3000  
 
+-------------------------------------------------------------------------------
 
-## 5. HUẤN LUYỆN AUTOSUGGEST (N-GRAM MODEL)
+# 7. TUỲ CHỈNH CẤU HÌNH
 
-### 1. Làm sạch corpus:
-$ python src/autosuggest/data/clean_corpus.py
+Autocorrect top-k:  
+TOP_K = 5  
 
-### 2. Tạo noisy pairs:
-$ python src/autosuggest/data/generate_noisy_pairs.py
+N-gram context length:  
+N = 3  
 
-### 3. Huấn luyện mô hình:
-$ python src/autosuggest/scripts/train_ngram.py
+Rule sửa phím:  
+keyboard_fix.py  
 
+Rule teencode:  
+hard_rules.py  
 
-## 6. HUẤN LUYỆN AUTOCORRECT MODEL
+-------------------------------------------------------------------------------
 
-Autocorrect sử dụng nhiều rule kết hợp dữ liệu huấn luyện sai → đúng.
+# 8. LỖI THƯỜNG GẶP
 
-### 1. Làm sạch dữ liệu:
-$ python src/autocorrect/data/clean_external_corpus.py
+Thiếu dependencies Python:  
+$ pip install -r requirements.txt  
 
-### 2. Xây dựng từ điển:
-$ python src/autocorrect/data/build_vocab.py
+Node.js không chạy:  
+$ npm install  
 
-### 3. Phân tích và lọc cặp từ sai/đúng:
-$ python src/autocorrect/data/analyze_pairs.py
-$ python src/autocorrect/data/filter_pairs.py
+Lỗi Unicode:  
+$ python src/autocorrect/core/normalize_vi.py  
 
-### 4. Train mô hình:
-$ python src/autocorrect/scripts/autocorrect_model.py
+-------------------------------------------------------------------------------
 
+# 9. HOÀN TẤT  
+README này đã bao gồm đầy đủ:  
+- Overview  
+- Features  
+- Project Structure  
+- Installation  
+- Tutorial  
+- Bot integration  
+- Config  
+- Troubleshooting  
 
-## 7. TÍCH HỢP VỚI MEZON BOT (NODE.JS)
-
-### 1. Cài dependencies:
-$ cd mezon_bot
-$ npm install
-
-### 2. Chạy bot:
-$ node index.js
-
-### 3. Test bot:
-$ node bot_test.js
-
-
-## 8. UI DEMO
-
-UI demo được xây dựng bằng Node.js.
-
-Chạy UI:
-$ node index.js
-
-Truy cập:
-http://localhost:3000
-
-
-## 9. TUỲ CHỈNH CẤU HÌNH
-
-Số lượng gợi ý trả về:
-TOP_K = 5
-
-Độ dài n-gram:
-N = 3
-
-Điều chỉnh rules sửa bàn phím:
-keyboard_fix.py
-
-Điều chỉnh rules teencode:
-hard_rules.py
-
-
-## 10. LỖI THƯỜNG GẶP
-
-Thiếu thư viện Python:
-$ pip install -r requirements.txt
-
-Bot Node.js không chạy:
-$ npm install
-
-Lỗi Unicode tiếng Việt:
-$ python src/autocorrect/core/normalize_vi.py
-
-## HOÀN TẤT
