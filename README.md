@@ -218,3 +218,5 @@ README này đã bao gồm đầy đủ:
 - Config  
 - Troubleshooting  
 
+# Video Demo
+[![Watch the demo](https://raw.githubusercontent.com/Lighthouse0903/Mezon_Text_Sugg_Autocr/master/thumbnail.png)](https://github.com/Lighthouse0903/Mezon_Text_Sugg_Autocr/releases/download/v1.0.0/Demo.mp4)
